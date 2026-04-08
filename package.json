@@ -12,6 +12,7 @@
     "deploy": "npm run build:gh && gh-pages -d dist"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.102.1",
     "@turf/boolean-point-in-polygon": "^7.3.4",
     "@turf/circle": "^7.3.4",
     "@turf/helpers": "^7.3.4",
