@@ -1,0 +1,150 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  box-sizing: border-box;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header p {
+  margin: 0.25rem 0 0;
+  color: #475569;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.75rem;
+  min-height: 0;
+  flex: 1;
+}
+
+.map-wrap {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 500px;
+}
+
+.map-wrap > div {
+  height: 100%;
+}
+
+.side-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: auto;
+}
+
+.panel {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.75rem;
+}
+
+.panel h2,
+.panel h3 {
+  margin: 0 0 0.5rem;
+}
+
+.help {
+  margin: 0 0 0.5rem;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.zone-list {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.zone-btn {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.zone-btn.active {
+  border-color: #2563eb;
+}
+
+.swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #1f2937;
+  display: inline-block;
+}
+
+.editor,
+.check-grid,
+.circle-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+input,
+select,
+button {
+  font: inherit;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
+}
+
+button {
+  cursor: pointer;
+  background: #f8fafc;
+}
+
+.danger {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.locate-control button {
+  border: none;
+  border-radius: 0;
+  background: #fff;
+  padding: 0.35rem 0.6rem;
+}
+
+.locate-error {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+  border-radius: 6px;
+  margin: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  max-width: 320px;
+}
+
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  .map-wrap {
+    min-height: 380px;
+  }
+}
