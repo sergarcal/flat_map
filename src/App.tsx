@@ -1,12 +1,12 @@
 import circle from "@turf/circle";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import LoginPage from "./components/LoginPage";
 import MapCanvas from "./components/MapCanvas";
 import PropertyCheckPanel from "./components/PropertyCheckPanel";
 import ZonePanel from "./components/ZonePanel";
 import { useAuth } from "./context/AuthContext";
-import { loadZones, saveZones } from "./lib/storage";
+import { deleteZones, loadZones, saveZones } from "./lib/storage";
 import type { Zone } from "./types/zones";
 
 function nowIso(): string {
@@ -20,28 +20,78 @@ function App() {
   const [zonesLoading, setZonesLoading] = useState(true);
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
 
+  const prevZonesRef = useRef<Zone[]>([]);
+  const initialSyncRef = useRef(true);
+
   useEffect(() => {
-    // Simulate loading zones from DB with 2-second delay
-    const loadZonesWithDelay = async () => {
+    if (!user) {
+      prevZonesRef.current = [];
+      initialSyncRef.current = true;
+      setZones([]);
+      setZonesLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadUserZones = async () => {
       setZonesLoading(true);
-      // TODO: Replace with actual DB call
-      setTimeout(() => {
-        const loadedZones = loadZones();
+
+      try {
+        const loadedZones = await loadZones(user.id);
+        if (!isMounted) return;
         setZones(loadedZones);
-        setZonesLoading(false);
-      }, 2000);
+        prevZonesRef.current = loadedZones;
+        initialSyncRef.current = false;
+      } catch (error) {
+        console.error("Failed to load zones", error);
+        if (!isMounted) return;
+        setZones([]);
+      } finally {
+        if (isMounted) {
+          setZonesLoading(false);
+        }
+      }
     };
 
-    if (user) {
-      loadZonesWithDelay();
-    }
+    loadUserZones();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   useEffect(() => {
-    if (!zonesLoading) {
-      saveZones(zones);
+    if (!user || zonesLoading) return;
+    if (initialSyncRef.current) {
+      prevZonesRef.current = zones;
+      initialSyncRef.current = false;
+      return;
     }
-  }, [zones, zonesLoading]);
+
+    const syncZones = async () => {
+      const previousZones = prevZonesRef.current;
+      const deletedIds = previousZones
+        .filter((zone) => !zones.some((current) => current.id === zone.id))
+        .map((zone) => zone.id);
+
+      try {
+        if (deletedIds.length > 0) {
+          await deleteZones(deletedIds, user.id);
+        }
+
+        if (zones.length > 0) {
+          await saveZones(zones, user.id);
+        }
+      } catch (error) {
+        console.error("Failed to persist zones", error);
+      } finally {
+        prevZonesRef.current = zones;
+      }
+    };
+
+    syncZones();
+  }, [zones, user, zonesLoading]);
 
   const onUpdateZone = (zoneId: string, patch: Partial<Zone>) => {
     setZones((prev) =>
