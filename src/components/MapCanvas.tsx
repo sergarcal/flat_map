@@ -14,7 +14,7 @@ import {
 } from "react-leaflet";
 import type { Zone } from "../types/zones";
 
-const DEFAULT_CENTER: [number, number] = [41.3851, 2.1734];
+const DEFAULT_CENTER: [number, number] = [41.34527, 2.060415];
 
 interface MapCanvasProps {
   zones: Zone[];
@@ -96,6 +96,7 @@ export default function MapCanvas({
 
       if (!featureGroupRef.current || zonesLoading) return;
       const group = featureGroupRef.current;
+      clickEditControlThenCancel();
 
       group.eachLayer((layer: L.Layer) => {
         const zoneId = getLayerZoneId(layer);
@@ -139,8 +140,6 @@ export default function MapCanvas({
           layerType: string;
           layer: L.Layer;
         };
-        if (!featureGroupRef.current) return;
-        featureGroupRef.current.addLayer(event.layer);
         handleCreated(event);
       };
 
@@ -188,7 +187,7 @@ export default function MapCanvas({
         layer.setStyle({
           color: zone.color,
           fillColor: zone.color,
-          fillOpacity: zone.id === selectedZoneId ? 0.32 : 0.2,
+          fillOpacity: zone.id === selectedZoneId ? 0.65 : 0.45,
           weight: zone.id === selectedZoneId ? 3 : 2,
         });
       }
@@ -329,10 +328,24 @@ export default function MapCanvas({
     onZoneSelect(zoneId);
   };
 
+  const clickEditControlThenCancel = useCallback(() => {
+    const editControl = document.querySelector<HTMLElement>(
+      ".leaflet-draw-edit-edit",
+    );
+    if (!editControl) return;
+
+    editControl.click();
+
+    const cancelControl = document.querySelector<HTMLElement>(
+      ".leaflet-draw-actions .leaflet-draw-cancel, .leaflet-draw-actions .leaflet-draw-action",
+    );
+    cancelControl?.click();
+  }, []);
+
   return (
     <MapContainer
       center={DEFAULT_CENTER}
-      zoom={11}
+      zoom={12}
       style={{ height: "100%", width: "100%" }}
     >
       <MapInstanceBinder />
@@ -365,7 +378,7 @@ export default function MapCanvas({
               pathOptions={{
                 color: zone.color,
                 fillColor: zone.color,
-                fillOpacity: zone.id === selectedZoneId ? 0.32 : 0.2,
+                fillOpacity: zone.id === selectedZoneId ? 0.5 : 0.3,
                 weight: zone.id === selectedZoneId ? 3 : 2,
               }}
               eventHandlers={{ click: onShapeClick(zone.id) }}
@@ -383,7 +396,7 @@ export default function MapCanvas({
               pathOptions={{
                 color: zone.color,
                 fillColor: zone.color,
-                fillOpacity: zone.id === selectedZoneId ? 0.32 : 0.2,
+                fillOpacity: zone.id === selectedZoneId ? 0.5 : 0.3,
                 weight: zone.id === selectedZoneId ? 3 : 2,
               }}
               eventHandlers={{ click: onShapeClick(zone.id) }}
