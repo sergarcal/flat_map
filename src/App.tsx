@@ -16,12 +16,32 @@ function nowIso(): string {
 function App() {
   const { user, loading, logout } = useAuth();
 
-  const [zones, setZones] = useState<Zone[]>(() => loadZones());
+  const [zones, setZones] = useState<Zone[]>([]);
+  const [zonesLoading, setZonesLoading] = useState(true);
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
 
   useEffect(() => {
-    saveZones(zones);
-  }, [zones]);
+    // Simulate loading zones from DB with 2-second delay
+    const loadZonesWithDelay = async () => {
+      setZonesLoading(true);
+      // TODO: Replace with actual DB call
+      setTimeout(() => {
+        const loadedZones = loadZones();
+        setZones(loadedZones);
+        setZonesLoading(false);
+      }, 2000);
+    };
+
+    if (user) {
+      loadZonesWithDelay();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!zonesLoading) {
+      saveZones(zones);
+    }
+  }, [zones, zonesLoading]);
 
   const onUpdateZone = (zoneId: string, patch: Partial<Zone>) => {
     setZones((prev) =>
@@ -101,7 +121,47 @@ function App() {
             selectedZoneId={selectedZoneId}
             onZoneSelect={setSelectedZoneId}
             onZonesChanged={setZones}
+            zonesLoading={zonesLoading}
           />
+          {zonesLoading && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(255, 255, 255, 0.8)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "16px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    border: "4px solid #f3f3f3",
+                    borderTop: "4px solid #3498db",
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite",
+                  }}
+                />
+                <p style={{ margin: 0, color: "#666", fontSize: "14px" }}>
+                  Loading zones...
+                </p>
+              </div>
+            </div>
+          )}
         </div>
         <div className="side-panels">
           <ZonePanel
